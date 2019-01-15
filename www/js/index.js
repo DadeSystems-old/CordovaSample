@@ -28,6 +28,7 @@ var app = {
     // 'pause', 'resume', etc.
     onDeviceReady: function() {
         this.receivedEvent('deviceready');
+        this.bindPayButton();
     },
 
     // Update DOM on a Received Event
@@ -40,6 +41,38 @@ var app = {
         receivedElement.setAttribute('style', 'display:block;');
 
         console.log('Received Event: ' + id);
+    },
+
+    bindPayButton: function() {
+      document
+        .getElementById('pay-by-check')
+        .addEventListener("click", this.payButtonClicked);
+    },
+
+    payButtonClicked: function(event) {
+      event.preventDefault();
+
+      const ref = cordova.InAppBrowser.open(
+        'http://localhost:3000/mobile_payments/new?success_url="http://company.com/success.html"&cancel_url="http://company.com/cancel.html"', 
+        // 'https://cordova.apache.org', 
+        '_blank', 
+        'location=yes'
+      );
+
+      console.log(ref);
+
+      ref.addEventListener('loadstart', function(data){
+        console.log('load start');
+      });
+
+      ref.addEventListener('loadstop', function(data){
+        console.log('load stop');
+        console.log(data);
+      });
+
+      ref.addEventListener('loaderror', function(data){
+        console.log('loade rror');
+      });
     }
 };
 
