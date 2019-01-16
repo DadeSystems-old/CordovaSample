@@ -17,62 +17,61 @@
  * under the License.
  */
 var app = {
-    // Application Constructor
-    initialize: function() {
-        document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
-    },
+  // Application Constructor
+  initialize: function() {
+    document.addEventListener(
+      'deviceready', 
+      this.onDeviceReady.bind(this), 
+      false
+    );
+  },
 
-    // deviceready Event Handler
-    //
-    // Bind any cordova events here. Common events are:
-    // 'pause', 'resume', etc.
-    onDeviceReady: function() {
-        this.receivedEvent('deviceready');
-        this.bindPayButton();
-    },
+  // deviceready Event Handler
+  //
+  // Bind any cordova events here. Common events are:
+  // 'pause', 'resume', etc.
+  onDeviceReady: function() {
+    this.bindPayButton();
+  },
 
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
+  bindPayButton: function() {
+    document
+      .getElementById('pay-by-check')
+      .addEventListener("click", this.payButtonClicked);
+  },
 
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
+  payButtonClicked: function(event) {
+    event.preventDefault();
 
-        console.log('Received Event: ' + id);
-    },
+    const SERVICE_URL = 'http://192.168.1.122:3000/mobile_payments/new';
+    const SUCCESS_URL = 'https://www.company.com/success.html';
+    const CANCEL_URL = 'https://www.company.com/cancel.html';
 
-    bindPayButton: function() {
-      document
-        .getElementById('pay-by-check')
-        .addEventListener("click", this.payButtonClicked);
-    },
+    const ref = cordova.InAppBrowser.open(
+      `${SERVICE_URL}?success_url="${SUCCESS_URL}"&cancel_url="${CANCEL_URL}"`, 
+      '_blank', 
+      'location=no'
+    );
 
-    payButtonClicked: function(event) {
-      event.preventDefault();
+    ref.addEventListener('loadstart', function(event){
+      if (event.url.startsWith(SUCCESS_URL)) handleSuccess(event);
+      else if (event.url.startsWith(CANCEL_URL)) handleCancel(event);
+    });
 
-      const ref = cordova.InAppBrowser.open(
-        'http://localhost:3000/mobile_payments/new?success_url="http://company.com/success.html"&cancel_url="http://company.com/cancel.html"', 
-        // 'https://cordova.apache.org', 
-        '_blank', 
-        'location=yes'
-      );
-
-      console.log(ref);
-
-      ref.addEventListener('loadstart', function(data){
-        console.log('load start');
-      });
-
-      ref.addEventListener('loadstop', function(data){
-        console.log('load stop');
-      });
-
-      ref.addEventListener('loaderror', function(data){
-        console.log('loade rror');
-      });
+    function handleSuccess(event) {
+      ref.close();
+      setTimeout(function(){
+        alert('Payment Success!');
+      }, 100);
     }
+
+    function handleCancel(event) {
+      ref.close();
+      setTimeout(function(){
+        alert('Payment Canceled!');
+      }, 100);
+    }
+  },
 };
 
 app.initialize();
