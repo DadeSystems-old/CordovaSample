@@ -26,4 +26,16 @@ body {
   -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
 }
 
+body, 
+html, 
+iframe {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
 
+#payment-iframe {
+  border: none;
+  display: none;
+}

@@ -1,54 +1,57 @@
-const app = {
+window.addEventListener("message", receiveMessage, false);
+
+function payNow() {
+  const SERVICE_URL = 'http://192.168.1.122:3000/mobile_payments/new';
   
-  initialize: function() {
-    document
-      .getElementById('pay-by-check')
-      .addEventListener('click', this.payButtonClicked);
-  },
+  const params = {
+    api_key: '2b4d57bb43bf6bfe7a600ecb1e7cf1a5',
+    external_user_id: '123',
+    amount: 555.50,
+    // parent_capture_enabled: true
+  };
 
-  payButtonClicked: function(event) {
-    event.preventDefault();
+  $('#payment-iframe')
+    .attr('src', `${SERVICE_URL}?${paramsToString(params)}`)
+    .show();
+  
+  $('#home-screen').hide();
+}
 
-    const SERVICE_URL = 'http://192.168.1.122:3000/mobile_payments/new';
-    const SUCCESS_URL = 'https://www.company.com/success.html';
-    const CANCEL_URL = 'https://www.company.com/cancel.html';
-    
-    const params = {
-      api_key: '2b4d57bb43bf6bfe7a600ecb1e7cf1a5',
-      external_user_id: '123',
-      amount: 50,
-      success_url: SUCCESS_URL,
-      cancel_url: CANCEL_URL
-    };
+function receiveMessage(event){
+  if (event.origin !== "http://192.168.1.122:3000") return;
+  if (event.data.imageRequested) handleImageRequest(event.data.imageRequested);
+  else if (event.data.paymentSuccess) handlePaymentSuccess();
+  else if (event.data.paymentCanceled) handlePaymentCanceled();
+}
 
-    const paramString = Object.keys(params).map(function(key) {
-      return key + '=' + params[key];
-    }).join('&');
+function handlePaymentSuccess(){
+  $('#home-screen').show();
+  $('#payment-iframe').hide();
+  showAlert('Payment was successful!');
+}
 
-    const ref = cordova.InAppBrowser.open(
-      `${SERVICE_URL}?${paramString}`, 
-      '_blank', 
-      'location=no'
-    );
+function handlePaymentCanceled() {
+  $('#home-screen').show();
+  $('#payment-iframe').hide();
+  showAlert('Payment was canceled!');
+}
 
-    ref.addEventListener('loadstart', function(event){
-      if (!event.url.startsWith(SERVICE_URL)) ref.close();
-      if (event.url.startsWith(SUCCESS_URL)) handleSuccess(event);
-      else if (event.url.startsWith(CANCEL_URL)) handleCancel(event);
-    });
+function showAlert(message){
+  setTimeout(function(){ 
+    alert(message);
+  }, 100);
+}
 
-    function handleSuccess(event) {
-      setTimeout(function(){
-        alert('Payment Success!');
-      }, 100);
-    }
+function handleImageRequest(imageType) {
+  const imageDataUrl = `data:image/png,${imageType}_base64_placeholder`;
+  event.source.postMessage({
+    imageType,
+    imageDataUrl
+  }, '*');
+}
 
-    function handleCancel(event) {
-      setTimeout(function(){
-        alert('Payment Canceled!');
-      }, 100);
-    }
-  },
-};
-
-app.initialize();
+function paramsToString(params){
+  return Object.keys(params).map(function(key) {
+    return key + '=' + params[key];
+  }).join('&');
+}
