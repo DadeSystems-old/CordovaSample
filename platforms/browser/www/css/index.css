@@ -39,3 +39,10 @@ iframe {
   border: none;
   display: none;
 }
+
+#results {
+  width: 85%;
+  margin: auto;
+  margin-top: 20px;
+  display: none;
+}

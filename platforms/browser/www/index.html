@@ -13,10 +13,21 @@
     <nav class="navbar navbar-dark bg-primary">
       <span class="navbar-brand mb-0 h1">Sample App</span>
     </nav>
-    <div id="home-screen" class="text-center">
-      <button type="button" onclick="payNow()" class="btn btn-primary mt-5">
-        Pay Now
-      </button>
+    <div id="home-screen">
+      <div class="text-center">
+        <button 
+          type="button" 
+          onclick="payNow()" 
+          class="btn btn-primary mt-5">
+          Pay Now
+        </button>
+      </div>
+      <div id="results" class="card">
+        <div class="card-body">
+          <h5 class="title card-title text-center">Results</h5>
+          <pre class="data"></pre>
+        </div>
+      </div>
     </div>
     <iframe id="payment-iframe"></iframe>
     <script type="text/javascript" src="cordova.js"></script>

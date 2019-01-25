@@ -1,8 +1,6 @@
-window.addEventListener("message", receiveMessage, false);
-
 const SERVICE_URL = 'http://192.168.1.122:3000/mobile_payments/new';
 
-function payNow() {  
+function payNow() {
   const params = {
     api_key: '2b4d57bb43bf6bfe7a600ecb1e7cf1a5',
     external_user_id: '123',
@@ -15,20 +13,37 @@ function payNow() {
     .show();
   
   $('#home-screen').hide();
+  $('#results').hide();
+  $('#results .data').text('');
 }
 
 // 
 // Dade Events
 // 
+
+// Listen to messages sent from the iFrame
+window.addEventListener("message", receiveMessage, false);
+
 function receiveMessage(event){
   if (!SERVICE_URL.startsWith(event.origin)) return;
-  if (event.data.imageRequested) handleImageRequest(event);
-  else if (event.data.paymentSuccess) handlePaymentSuccess();
-  else if (event.data.paymentCanceled) handlePaymentCanceled();
+
+  const { eventType, eventData } = event.data;
+
+  switch(eventType) {
+    case 'IMAGE_REQUEST':
+      handleImageRequest(event, eventData);
+      break;
+    case 'PAYMENT_SUCCESS':
+      handlePaymentSuccess(eventData)
+      break;
+    case 'PAYMENT_CANCELED':
+      handlePaymentCanceled();
+      break;
+  }
 }
 
-function handleImageRequest(event) {
-  const imageType = event.data.imageRequested; 
+function handleImageRequest(event, eventData) {
+  const imageType = eventData.imageType; 
 
   function onSuccess(imageData) {
     const imageDataUrl = "data:image/jpeg;base64," + imageData;
@@ -48,16 +63,19 @@ function handleImageRequest(event) {
   });
 }
 
-function handlePaymentSuccess(){
+function handlePaymentSuccess(eventData){
   $('#home-screen').show();
   $('#payment-iframe').hide();
-  showAlert('Payment was successful!');
+  $('#results').show();
+  $('#results .title').text('Success!');
+  $('#results .data').text(JSON.stringify(eventData, null, 2));
 }
 
 function handlePaymentCanceled() {
   $('#home-screen').show();
   $('#payment-iframe').hide();
-  showAlert('Payment was canceled!');
+  $('#results').show();
+  $('#results .title').text('Canceled!');
 }
 
 // 
@@ -67,10 +85,4 @@ function paramsToString(params){
   return Object.keys(params).map(function(key) {
     return key + '=' + params[key];
   }).join('&');
-}
-
-function showAlert(message){
-  setTimeout(function(){ 
-    alert(message);
-  }, 100);
 }
