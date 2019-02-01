@@ -1,4 +1,4 @@
-const SERVICE_URL = 'http://192.168.1.122:3000/mobile_payments/new';
+const DADE_SERVICE_URL = 'http://192.168.1.122:3000/mobile_payments/new';
 
 function payNow() {
   const params = {
@@ -9,7 +9,7 @@ function payNow() {
   };
 
   $('#payment-iframe')
-    .attr('src', `${SERVICE_URL}?${paramsToString(params)}`)
+    .attr('src', `${DADE_SERVICE_URL}?${paramsToString(params)}`)
     .show();
   
   $('#home-screen').hide();
@@ -25,7 +25,7 @@ function payNow() {
 window.addEventListener("message", receiveMessage, false);
 
 function receiveMessage(event){
-  if (!SERVICE_URL.startsWith(event.origin)) return;
+  if (!DADE_SERVICE_URL.startsWith(event.origin)) return;
 
   const { eventType, eventData } = event.data;
 
