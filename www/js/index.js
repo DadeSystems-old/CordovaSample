@@ -1,88 +1,165 @@
-const DADE_SERVICE_URL = 'http://192.168.1.122:3000/mobile_payments/new';
+const DADE_API_KEY = '2b4d57bb43bf6bfe7a600ecb1e7cf1a5';
+const dadeMobile = DadeMobile(DADE_API_KEY);
+const state = {};
 
-function payNow() {
-  const params = {
-    api_key: '2b4d57bb43bf6bfe7a600ecb1e7cf1a5',
-    external_user_id: '123',
-    amount: 555.55,
-    parent_capture_enabled: true
-  };
+function stagePayment() {
+  showLoading();
 
-  $('#payment-iframe')
-    .attr('src', `${DADE_SERVICE_URL}?${paramsToString(params)}`)
-    .show();
-  
-  $('#home-screen').hide();
-  $('#results').hide();
-  $('#results .data').text('');
-}
-
-// 
-// Dade Events
-// 
-
-// Listen to messages sent from the iFrame
-window.addEventListener("message", receiveMessage, false);
-
-function receiveMessage(event){
-  if (!DADE_SERVICE_URL.startsWith(event.origin)) return;
-
-  const { eventType, eventData } = event.data;
-
-  switch(eventType) {
-    case 'IMAGE_REQUEST':
-      handleImageRequest(event, eventData);
-      break;
-    case 'PAYMENT_SUCCESS':
-      handlePaymentSuccess(eventData)
-      break;
-    case 'PAYMENT_CANCELED':
-      handlePaymentCanceled();
-      break;
-  }
-}
-
-function handleImageRequest(event, eventData) {
-  const imageType = eventData.imageType; 
-
-  function onSuccess(imageData) {
-    const imageDataUrl = "data:image/jpeg;base64," + imageData;
-    event.source.postMessage({
-      imageType,
-      imageDataUrl
-    }, '*');
-  }
-  
-  function onFail(message) {
-    alert('Failed because: ' + message);
-  }
-
-  navigator.camera.getPicture(onSuccess, onFail, { 
-    quality: 25,
-    destinationType: Camera.DestinationType.DATA_URL
+  dadeMobile.stagePayment({ 
+    external_user_id: '1234',
+    check_amount: 5.00
+  })
+  .then((payment) => {
+    state.payment = payment;
+    showPaymentScreen();
+  })
+  .catch((error) => {
+    showError(error);
+  })
+  .finally(function() {
+    hideLoading();
   });
 }
 
-function handlePaymentSuccess(eventData){
+function setPaymentAmount(amount) {
+  showLoading();
+
+  dadeMobile.setAmount(state.payment, amount)
+  .then((payment) => {
+    state.payment = payment;
+  })
+  .catch((error) => {
+    showError(error);
+  })
+  .finally(function() {
+    hideLoading();
+  });
+}
+
+function uploadCheckImage(imageType, encodedImage) {
+  showLoading();
+
+  dadeMobile.uploadImage(state.payment, imageType, encodedImage)
+  .then((payment) => {
+    state.payment = payment;
+    setCaptureIcon(imageType);
+  })
+  .catch((error) => {
+    showError(error);
+  })
+  .finally(function() {
+    hideLoading();
+  });
+}
+
+function submitPayment(event) {
+  event.preventDefault();
+  showLoading();
+  clearErrors();
+
+  dadeMobile.confirmPayment(state.payment)
+  .then((confirmation) => {
+    hideLoading();
+    showSuccess(confirmation);
+  })
+  .catch((error) => {
+    const { validationErrors } = error;
+    if (validationErrors) handleValidationErrors(validationErrors);
+    else showError(error);
+  })
+  .finally(function() {
+    hideLoading();
+  });
+}
+
+// 
+// UI
+// 
+
+function showLoading() {
+  $('#loading').show();
+}
+
+function hideLoading() {
+  $('#loading').hide();
+}
+
+function showPaymentScreen() {
+  resetCaptureIcons();
+  $('#home-screen').hide();
+  $('#results').hide();
+  $('#payment-screen').show();
+}
+
+function clearErrors() {
+  $('#errors').html('').hide();
+}
+
+function showSuccess(data) {
   $('#home-screen').show();
-  $('#payment-iframe').hide();
+  $('#payment-screen').hide();
   $('#results').show();
   $('#results .title').text('Success!');
-  $('#results .data').text(JSON.stringify(eventData, null, 2));
+  $('#results .data').text(JSON.stringify(data, null, 2));
 }
 
-function handlePaymentCanceled() {
+function showError(error) {
+  alert(error);
+}
+
+function handleValidationErrors(errors) {
+  const errorItems = errors.map((error) => {
+    return `<li>${error.error_message}</li>`;
+  });
+
+  $('#errors')
+    .html(`<ul class='list-unstyled'>${errorItems.join('')}</ul>`)
+    .show();
+}
+
+function cancelPayment() {
+  // TODO: delete payment on dade?
+  hideLoading();
+  clearErrors();
+  $('#payment-screen').hide();
   $('#home-screen').show();
-  $('#payment-iframe').hide();
-  $('#results').show();
-  $('#results .title').text('Canceled!');
 }
 
-// 
-// Util functions
-// 
-function paramsToString(params){
-  return Object.keys(params).map(function(key) {
-    return key + '=' + params[key];
-  }).join('&');
+function handleAmountChange(event) {
+  const amount = event.target.value;
+  setPaymentAmount(amount);
+}
+
+function captureCheckImage(imageType) {
+  clearErrors();
+  captureImage()
+  .then((encodedImage) => {
+    uploadCheckImage(imageType, encodedImage);
+  })
+  .catch((error) => {
+    showError(error);
+  });
+}
+
+function captureImage() {
+  return new Promise(function(resolve, reject) {
+    navigator.camera.getPicture(resolve, reject, { 
+      quality: 25,
+      destinationType: Camera.DestinationType.DATA_URL
+    });
+  });
+}
+
+function setCaptureIcon(imageType) {
+  $(`#${imageType}-icon`)
+    .addClass('fa-check')
+    .removeClass('fa-camera');
+}
+
+function resetCaptureIcons() {
+  ['checkfront', 'checkrear'].forEach((imageType) => {
+    $(`#${imageType}-icon`)
+      .addClass('fa-camera')
+      .removeClass('fa-check');
+  });
 }

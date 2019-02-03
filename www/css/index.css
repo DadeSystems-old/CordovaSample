@@ -26,23 +26,49 @@ body {
   -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
 }
 
-body, 
-html, 
-iframe {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
+.screen {
+  margin-top: 25px;
 }
 
-#payment-iframe {
-  border: none;
+#loading {
+  background-color: #ffffffa3;
+  height: calc(100% - 56px);
+  width: 100%;
+  left: 0;
+  position: absolute;
+  text-align: center;
+  padding-top: 150px;
   display: none;
+  z-index: 99999;
 }
 
 #results {
-  width: 85%;
+  max-width: 350px;
   margin: auto;
   margin-top: 20px;
   display: none;
+}
+
+#payment-screen {
+  display: none;
+}
+
+#payment-screen .checkout {
+  max-width: 360px;
+  margin: auto;
+}
+
+#payment-screen .form-actions {
+  text-align: center;
+  border-top: solid 1px whitesmoke;
+  margin-top: 30px;
+  padding-top: 30px;
+}
+
+#payment-screen #errors {
+  display: none;
+}
+
+#payment-screen #errors ul {
+  margin-bottom: 0
 }
