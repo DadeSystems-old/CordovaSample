@@ -59,12 +59,11 @@ function submitPayment(event) {
 
   dadeMobile.confirmPayment(state.payment)
   .then((confirmation) => {
-    hideLoading();
     showSuccess(confirmation);
   })
   .catch((error) => {
     const { validationErrors } = error;
-    if (validationErrors) handleValidationErrors(validationErrors);
+    if (validationErrors) showValidationErrors(validationErrors);
     else showError(error);
   })
   .finally(function() {
@@ -72,57 +71,20 @@ function submitPayment(event) {
   });
 }
 
-// 
-// UI
-// 
-
-function showLoading() {
-  $('#loading').show();
-}
-
-function hideLoading() {
-  $('#loading').hide();
-}
-
-function showPaymentScreen() {
-  resetCaptureIcons();
-  $('#home-screen').hide();
-  $('#results').hide();
-  $('#payment-screen').show();
-}
-
-function clearErrors() {
-  $('#errors').html('').hide();
-}
-
-function showSuccess(data) {
-  $('#home-screen').show();
-  $('#payment-screen').hide();
-  $('#results').show();
-  $('#results .title').text('Success!');
-  $('#results .data').text(JSON.stringify(data, null, 2));
-}
-
-function showError(error) {
-  alert(error);
-}
-
-function handleValidationErrors(errors) {
-  const errorItems = errors.map((error) => {
-    return `<li>${error.error_message}</li>`;
-  });
-
-  $('#errors')
-    .html(`<ul class='list-unstyled'>${errorItems.join('')}</ul>`)
-    .show();
-}
-
 function cancelPayment() {
-  // TODO: delete payment on dade?
-  hideLoading();
+  showLoading();
   clearErrors();
-  $('#payment-screen').hide();
-  $('#home-screen').show();
+
+  dadeMobile.cancelPayment(state.payment)
+  .then(() => {
+    showHomeScreen();
+  })
+  .catch((error) => {
+    showError(error);
+  })
+  .finally(function() {
+    hideLoading();
+  });
 }
 
 function handleAmountChange(event) {
@@ -148,6 +110,56 @@ function captureImage() {
       destinationType: Camera.DestinationType.DATA_URL
     });
   });
+}
+
+// 
+// UI
+// 
+
+function showLoading() {
+  $('#loading').show();
+}
+
+function hideLoading() {
+  $('#loading').hide();
+}
+
+function showHomeScreen() {
+  $('#payment-screen').hide();
+  $('#home-screen').show();
+}
+
+function showPaymentScreen() {
+  resetCaptureIcons();
+  $('#home-screen').hide();
+  $('#results').hide();
+  $('#payment-screen').show();
+}
+
+function clearErrors() {
+  $('#errors').html('').hide();
+}
+
+function showSuccess(data) {
+  $('#home-screen').show();
+  $('#payment-screen').hide();
+  $('#results').show();
+  $('#results .title').text('Success!');
+  $('#results .data').text(JSON.stringify(data, null, 2));
+}
+
+function showError(error) {
+  alert(error);
+}
+
+function showValidationErrors(errors) {
+  const errorItems = errors.map((error) => {
+    return `<li>${error.error_message}</li>`;
+  });
+
+  $('#errors')
+    .html(`<ul class='list-unstyled'>${errorItems.join('')}</ul>`)
+    .show();
 }
 
 function setCaptureIcon(imageType) {
