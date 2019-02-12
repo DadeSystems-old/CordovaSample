@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <title>Sample App</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-primary">
+      <span class="navbar-brand">Sample App</span>
+    </nav>
+    <div id="loading">
+      <i class="fas fa-spin fa-2x fa-spinner"></i>
+    </div>
+    <div id="home-screen" class="screen">
+      <div class="text-center">
+        <button 
+          type="button" 
+          onclick="app.handlePaymentClick()" 
+          class="btn btn-lg btn-light">
+          Check Payment
+        </button>
+      </div>
+      <div id="results" class="card">
+        <div class="card-body">
+          <h5 class="title card-title text-center">Results</h5>
+          <pre class="data"></pre>
+        </div>
+      </div>
+    </div>
+    <div id="payment-screen" class="screen">
+      <div class="card checkout">
+        <div class="card-body">
+          <form>
+            <div id="errors" class="alert alert-danger" role="alert"></div>
+            <div class="form-group">
+              <label for="amount">Amount</label>
+              <select 
+                class="form-control" 
+                id="amount" 
+                onchange="app.handleAmountChange(event)">
+                <option value="5">$5.00</option>
+                <option value="10">$10.00</option>
+                <option value="15">$15.00</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Check</label>
+              <div>
+                <button 
+                  type="button" 
+                  class="btn btn-light btn-lg btn-block"
+                  onclick="app.handleCheckFrontClick()">
+                  <i id="checkfront-icon" class="fas fa-fw fa-camera"></i>
+                  Check Front
+                </button>
+                <button 
+                  type="button" 
+                  class="btn btn-light btn-lg btn-block"
+                  onclick="app.handleCheckRearClick()">
+                  <i id="checkrear-icon" class="fas fa-fw fa-camera"></i>
+                  Check Back
+                </button>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button 
+                type="submit"
+                class="btn btn-lg btn-primary"
+                onclick="app.handleSubmitClick(event)">
+                Submit Payment
+              </button>
+              <div class="d-block mt-2 text-center">
+                <button 
+                  type="reset" 
+                  class="btn btn-link" 
+                  onclick="app.handleCancelClick()">
+                  Cancel
+                </button>
+              </div>  
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+  </body>
+</html>
