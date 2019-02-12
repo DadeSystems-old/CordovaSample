@@ -34,8 +34,9 @@ stagePayment = () => {
   showLoading();
 
   dadeMobile.stagePayment({ 
-    external_user_id: '1234',
-    check_amount: 5.00
+    external_user_id: '123',
+    external_reference: '321',
+    amount: 5.00
   })
   .then((payment) => {
     state.payment = payment;
