@@ -11,7 +11,7 @@
     "author": "DadeSystems Inc",
     "license": "MIT",
     "dependencies": {
-        "@dadesystems/dademobile": "^1.0.2",
+        "@dadesystems/dademobile": "^1.0.3",
         "cordova-android": "^7.1.4",
         "cordova-browser": "^5.0.4",
         "cordova-ios": "^4.5.5",
