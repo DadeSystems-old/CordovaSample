@@ -17,10 +17,10 @@ const app = {
     setAmount(amount);
   },
   handleCheckFrontClick: () => {
-    captureCheckImage(dadeMobile.ImageTypes.CHECK_FRONT);
+    captureCheckImage('checkfront');
   },
   handleCheckRearClick: () => {
-    captureCheckImage(dadeMobile.ImageTypes.CHECK_REAR);
+    captureCheckImage('checkrear');
   },
   handleSubmitClick: (event) => {
     event.preventDefault();
