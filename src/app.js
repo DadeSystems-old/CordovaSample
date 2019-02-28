@@ -3,7 +3,8 @@
 // 
 const API_KEY = '{{DADE_API_KEY}}';
 const API_URL = '{{DADE_API_URL}}';
-const dadeMobile = require('@dadesystems/dademobile')(API_KEY, API_URL);
+const { DadeMobile } = require('@dadesystems/dademobile');
+const dadeMobile = new DadeMobile(API_KEY, API_URL);
 
 const state = {};
 
