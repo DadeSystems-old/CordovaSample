@@ -4,6 +4,7 @@
 const API_KEY = '{{DADE_API_KEY}}';
 const API_URL = '{{DADE_API_URL}}';
 const { DadeMobile } = require('@dadesystems/dademobile');
+const accounting = require('accounting-js');
 const dadeMobile = new DadeMobile(API_KEY, API_URL);
 
 const state = {};
@@ -82,18 +83,17 @@ uploadCheckImage = (imageType, encodedImage) => {
   });
 }
 
-submitPayment = () => {
+submitPayment = (params) => {
   showLoading();
   clearErrors();
 
-  dadeMobile.confirmPayment(state.payment)
+  dadeMobile.confirmPayment(state.payment, params)
   .then((payment) => {
     showSuccess(payment);
   })
   .catch((error) => {
-    const { validationErrors } = error;
-    validationErrors ? 
-      showValidationErrors(validationErrors) : showError(error);
+    const { errors } = error;
+    errors ? showValidationErrors(errors) : showError(error);
   })
   .finally(function() {
     hideLoading();
@@ -173,10 +173,15 @@ showSuccess = (data) => {
 }
 
 showError = (error) => {
-  alert(error);
+  alert(JSON.stringify(error));
 }
 
 showValidationErrors = (errors) => {
+  if (errors.length == 1 && errors[0].error_code == '2006') {
+    handleAmountMismatchError(errors[0]);
+    return;
+  }
+  
   const errorItems = errors.map((error) => {
     return `<li>${error.error_message}</li>`;
   });
@@ -184,6 +189,27 @@ showValidationErrors = (errors) => {
   $('#errors')
     .html(`<ul class='list-unstyled'>${errorItems.join('')}</ul>`)
     .show();
+}
+
+handleAmountMismatchError = (error) => {
+  const readAmount = accounting.formatMoney(error.error_data.read_amount);
+
+  navigator.notification.confirm(
+    'The amount read from the check does not match the provided amount.\n\n' +
+    'Amount read: ' + readAmount + '\n\n' +
+    'Please confirm that the provided amount is correct in order to ignore mismatch and continue.',
+     confirmAmount,
+    'Check Amount Mismatch',
+    ['Confirm', 'Cancel']
+  );
+}
+
+confirmAmount = (buttonIndex) => {
+  if (buttonIndex == 1) {
+    submitPayment({
+      ignore_check_amount_mismatch: true
+    });
+  }
 }
 
 setCaptureIcon = (imageType) => {
