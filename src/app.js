@@ -173,7 +173,7 @@ showSuccess = (data) => {
 }
 
 showError = (error) => {
-  alert(error);
+  alert(JSON.stringify(error));
 }
 
 showValidationErrors = (errors) => {
